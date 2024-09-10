@@ -6,10 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.constaints import (
-    CANNOT_DELETE_INVESTED_PROJECT,
-    CANNOT_UPDATE_FULLY_INVESTED_PROJECT,
-    CANT_SET_LESS_THAN_ALREADY_DONATED,
-    NOT_IN_DB, DB_CHANGE_ERROR
+    CANNOT_DELETE_INVESTED_PROJECT, CANNOT_UPDATE_FULLY_INVESTED_PROJECT,
+    CANT_SET_LESS_THAN_ALREADY_DONATED, DB_CHANGE_ERROR, NOT_IN_DB
 )
 from app.models.user import User
 

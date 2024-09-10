@@ -1,3 +1,5 @@
+from datetime import datetime
+
 GET_OBJECT_ERROR = 'Во время вызова таблицы {model} проищошла ошибка: {error}'
 DB_CHANGE_ERROR = (
     'При попытке изменения таблицы {model} '
@@ -21,3 +23,7 @@ ACCEPTED_REGEX = r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$'
 BEARER_TOKEN_URL = 'auth/jwt/login'
 JWT_LIFETIME = 3600
 AUTHENTICATION_BACKEND_NAME = 'jwt'
+FORMAT = "%Y/%m/%d %H:%M:%S"
+DATETIME_NOW = datetime.now().strftime(FORMAT)
+MINITMAL_ROW_COUNT = 3
+COLUMNCOUNT = 3
