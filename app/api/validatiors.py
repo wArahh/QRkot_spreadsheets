@@ -36,8 +36,8 @@ async def validate_charity_project_update(
             detail=CANNOT_UPDATE_FULLY_INVESTED_PROJECT
         )
     if (
-            charity_project.full_amount is not None
-            and db_project.invested_amount > charity_project.full_amount
+        charity_project.full_amount is not None and
+            db_project.invested_amount > charity_project.full_amount
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
