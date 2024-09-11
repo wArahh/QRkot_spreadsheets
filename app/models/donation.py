@@ -14,7 +14,7 @@ class Donation(Funding):
 
     def __repr__(self):
         return (
-            f"<CharityProject(user_id={self.user_id}, "
-            f"comment={self.comment[:20]}), "
-            f"{super().__repr__()}>"
+            f'CharityProject(user_id={self.user_id}, '
+            f'comment={self.comment[:20]}), '
+            f'{super().__repr__()}'
         )

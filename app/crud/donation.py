@@ -11,12 +11,13 @@ class CrudDonation(CrudBase):
             user_id: int,
             session: AsyncSession,
     ):
-        get_user_donations = await session.execute(
-            select(Donation).where(
-                Donation.user_id == user_id
+        return (
+            await session.execute(
+                select(Donation).where(
+                    Donation.user_id == user_id
+                )
             )
-        )
-        return get_user_donations.scalars().all()
+        ).scalars().all()
 
 
 donation_crud = CrudDonation(Donation)

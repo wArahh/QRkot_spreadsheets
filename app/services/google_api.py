@@ -1,46 +1,64 @@
-from aiogoogle import Aiogoogle
+from datetime import datetime
+from typing import Optional
 
-from app.constaints import COLUMNCOUNT, DATETIME_NOW, MINITMAL_ROW_COUNT
+from aiogoogle import Aiogoogle
+from aiogoogle.excs import AiogoogleError
+from fastapi import HTTPException, status
+
+from app.constaints import (
+    FORMAT, JSON_TEMLATE, MAX_GOOGLE_SHEET_CELL_COUNT,
+    TABLE_HEADER, TOO_MUCH_CELL_ERROR
+)
 from app.core.config import settings
 from app.utils import format_duration
 
 
-async def spreadsheets_create(kitty_report: Aiogoogle, column_count) -> str:
-    service = await kitty_report.discover('sheets', 'v4')
-    response = await kitty_report.as_service_account(
-        service.spreadsheets.create(
-            json={
-                'properties': {
-                    'title': f'Отчёт от {DATETIME_NOW}',
-                    'locale': 'ru_RU'
-                },
-                'sheets': [
-                    {
-                        'properties': {
-                            'sheetType': 'GRID',
-                            'sheetId': 0,
-                            'title': 'KittyReport',
-                            'gridProperties': {
-                                'rowCount': MINITMAL_ROW_COUNT + column_count,
-                                'columnCount': COLUMNCOUNT
-                            }
-                        }
-                    }
-                ]
-            }
+async def spreadsheets_create(
+        kitty_report: Aiogoogle,
+        row_count: Optional[int],
+        column_count: Optional[int]
+) -> str:
+    try:
+        availabe_cells = MAX_GOOGLE_SHEET_CELL_COUNT // column_count
+        if row_count > availabe_cells:
+            raise ValueError(
+                TOO_MUCH_CELL_ERROR.format(
+                    cell_difference=row_count - availabe_cells,
+                )
+            )
+        service = await kitty_report.discover('sheets', 'v4')
+        if row_count is not None:
+            JSON_TEMLATE['sheets'][0]['properties']['gridProperties'][
+                'rowCount'
+            ] = row_count
+        if column_count is not None:
+            JSON_TEMLATE['sheets'][0]['properties']['gridProperties'][
+                'columnCount'
+            ] = column_count
+        response = await kitty_report.as_service_account(
+            service.spreadsheets.create(json=JSON_TEMLATE)
         )
-    )
-    return response['spreadsheetId']
+        return response['spreadsheetId']
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except AiogoogleError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 
 async def set_user_permissions(
-        spreadsheetid: str,
+        spreadsheet_id: str,
         kitty_report: Aiogoogle
 ) -> None:
     service = await kitty_report.discover('drive', 'v3')
     await kitty_report.as_service_account(
         service.permissions.create(
-            fileId=spreadsheetid,
+            fileId=spreadsheet_id,
             json={
                 'type': 'user',
                 'role': 'writer',
@@ -52,18 +70,18 @@ async def set_user_permissions(
 
 
 async def spreadsheets_update_value(
-        spreadsheetid: str,
+        spreadsheet_id: str,
         charity_projects: list,
-        kitty_report: Aiogoogle
+        kitty_report: Aiogoogle,
+        row_count: Optional[int],
+        column_count: Optional[int]
 ) -> None:
     service = await kitty_report.discover('sheets', 'v4')
+    header_with_date = [row[:] for row in TABLE_HEADER]
+    header_with_date[0][1] = datetime.now().strftime(FORMAT)
     table_values = [
-        ['Отчёт от', DATETIME_NOW],
-        ['Топ проектов по скорости закрытия'],
-        ['Название проекта', 'Время сбора', 'Описание']
-    ]
-    for charity_project in charity_projects:
-        table_values.append(
+        *header_with_date,
+        *list(
             [
                 str(charity_project.name),
                 str(
@@ -73,12 +91,13 @@ async def spreadsheets_update_value(
                     )
                 ),
                 str(charity_project.description)
-            ]
+            ] for charity_project in charity_projects
         )
+    ]
     await kitty_report.as_service_account(
         service.spreadsheets.values.update(
-            spreadsheetId=spreadsheetid,
-            range=f'A1:C{len(table_values)}',
+            spreadsheetId=spreadsheet_id,
+            range=f'R1C1:R{row_count}C{column_count}',
             valueInputOption='USER_ENTERED',
             json={
                 'majorDimension': 'ROWS',

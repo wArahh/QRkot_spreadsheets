@@ -32,8 +32,8 @@ class Funding(Base):
 
     def __repr__(self):
         return (
-            f'<Funding need = {self.full_amount} '
-            f'already_donated = {self.invested_amount}>'
-            f'{self.create_date=}'
-            f'{self.close_date=}>'
+            f'{self.full_amount=}, '
+            f'{self.invested_amount=}, '
+            f'{self.create_date=}, '
+            f'{self.close_date=}, '
         )
