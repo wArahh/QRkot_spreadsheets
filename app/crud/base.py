@@ -1,14 +1,9 @@
 from typing import Optional
 
-from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.constaints import (
-    CANNOT_DELETE_INVESTED_PROJECT, CANNOT_UPDATE_FULLY_INVESTED_PROJECT,
-    CANT_SET_LESS_THAN_ALREADY_DONATED, DB_CHANGE_ERROR, NOT_IN_DB
-)
 from app.models.user import User
 
 
@@ -27,11 +22,6 @@ class CrudBase:
             )
         )
         obj = get_object.scalars().first()
-        if obj is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=NOT_IN_DB
-            )
         return obj
 
     async def get_all(
@@ -48,24 +38,16 @@ class CrudBase:
             obj,
             session: AsyncSession,
             user: Optional[User] = None,
+            commit: bool = True
     ):
         obj_data = obj.dict()
         if user is not None:
             obj_data['user_id'] = user.id
         new_obj = self.model(**obj_data)
-        try:
-            session.add(new_obj)
+        session.add(new_obj)
+        if commit:
             await session.commit()
             await session.refresh(new_obj)
-        except Exception as e:
-            await session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=DB_CHANGE_ERROR.format(
-                    model=self.model.__name__,
-                    error=e
-                )
-            )
         return new_obj
 
     async def update(
@@ -75,16 +57,6 @@ class CrudBase:
             session: AsyncSession,
     ):
         db_obj = await self.get(db_obj_id, session)
-        if db_obj.fully_invested == 1:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=CANNOT_UPDATE_FULLY_INVESTED_PROJECT
-            )
-        if db_obj.invested_amount > obj.full_amount:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=CANT_SET_LESS_THAN_ALREADY_DONATED
-            )
         update_data = obj.dict(exclude_unset=True)
         for field in jsonable_encoder(db_obj):
             if field in update_data:
@@ -99,25 +71,8 @@ class CrudBase:
             session: AsyncSession,
     ):
         db_obj = await self.get(db_obj_id, session)
-        if db_obj.invested_amount > 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=CANNOT_DELETE_INVESTED_PROJECT
-            )
-        try:
-            await session.delete(db_obj)
-            await session.commit()
-        except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=DB_CHANGE_ERROR.format(
-                    model=self.model.__name__,
-                    error=DB_CHANGE_ERROR.format(
-                        model=self.model.__name__,
-                        error=DB_CHANGE_ERROR.format()
-                    )
-                )
-            )
+        await session.delete(db_obj)
+        await session.commit()
         return db_obj
 
     @staticmethod

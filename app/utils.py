@@ -1,4 +1,5 @@
 from datetime import timedelta
+from app.constaints import BASE_ROW_COUNT, BASE_COLUMN_COUNT
 
 
 def format_duration(delta: timedelta) -> str:
@@ -15,3 +16,9 @@ def format_duration(delta: timedelta) -> str:
         f":{seconds}"
         f".{milliseconds}"
     )
+
+
+def calculate_dimensions(data: list[dict]) -> (int, int):
+    if not data:
+        return BASE_ROW_COUNT, BASE_COLUMN_COUNT
+    return len(data) + BASE_ROW_COUNT, BASE_COLUMN_COUNT

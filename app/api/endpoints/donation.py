@@ -45,7 +45,7 @@ async def create_donation(
         session: AsyncSession = Depends(get_async_session),
 ) -> CertainDonationDB:
     target = await donation_crud.create(
-        donation, session, user
+        donation, session, user, commit=False
     )
     session.add_all(
         donation_processing(

@@ -54,5 +54,6 @@ uvicorn app.main:app --reload
 - FastApi
 - fastapi-users[sqlalchemy] 
 - SQLAlchemy
+- aiogoogle
 ## Автор
 - [Макаренко Никита](https://github.com/wArahh)

@@ -130,3 +130,6 @@ dmypy.json
 
 # .idea
 .idea
+/fastapi.db
+/kitty_foundation.db
+/test.db

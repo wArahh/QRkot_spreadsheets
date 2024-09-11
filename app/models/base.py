@@ -17,6 +17,7 @@ class Funding(Base):
             '0 <= invested_amount <= full_amount'
         ),
         default=0,
+        nullable=False,
     )
     fully_invested = Column(
         Boolean,

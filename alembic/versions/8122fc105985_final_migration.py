@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('charityproject',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('full_amount', sa.Integer(), nullable=True),
-    sa.Column('invested_amount', sa.Integer(), nullable=True),
+    sa.Column('invested_amount', sa.Integer(), nullable=False),
     sa.Column('fully_invested', sa.Boolean(), nullable=True),
     sa.Column('create_date', sa.DateTime(), nullable=True),
     sa.Column('close_date', sa.DateTime(), nullable=True),

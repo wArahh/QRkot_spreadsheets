@@ -23,7 +23,7 @@ class CertainDonationDB(DonationBase):
 
 class DonationDB(CertainDonationDB):
     user_id: int
-    invested_amount: int
+    invested_amount: int = 0
     fully_invested: bool = Field(False)
     close_date: Optional[datetime] = None
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Extra, Field
 
 class CharityProjectBase(BaseModel):
     name: str = Field(..., max_length=100)
-    description: str = Field(None)
+    description: str
     full_amount: int = Field(ge=1)
 
     class Config:

@@ -1,13 +1,12 @@
+import copy
 from datetime import datetime
 from typing import Optional
 
 from aiogoogle import Aiogoogle
-from aiogoogle.excs import AiogoogleError
-from fastapi import HTTPException, status
 
 from app.constaints import (
     FORMAT, JSON_TEMLATE, MAX_GOOGLE_SHEET_CELL_COUNT,
-    TABLE_HEADER, TOO_MUCH_CELL_ERROR
+    TABLE_HEADER, TOO_MUCH_CELL_ERROR, BASE_ROW_COUNT
 )
 from app.core.config import settings
 from app.utils import format_duration
@@ -17,38 +16,28 @@ async def spreadsheets_create(
         kitty_report: Aiogoogle,
         row_count: Optional[int],
         column_count: Optional[int]
-) -> str:
-    try:
-        availabe_cells = MAX_GOOGLE_SHEET_CELL_COUNT // column_count
-        if row_count > availabe_cells:
-            raise ValueError(
-                TOO_MUCH_CELL_ERROR.format(
-                    cell_difference=row_count - availabe_cells,
-                )
+):
+    availabe_cells = MAX_GOOGLE_SHEET_CELL_COUNT // column_count
+    all_rows_count = BASE_ROW_COUNT + row_count
+    if all_rows_count > availabe_cells:
+        raise ValueError(
+            TOO_MUCH_CELL_ERROR.format(
+                all_rows_count=all_rows_count, availabe_cells=availabe_cells
             )
-        service = await kitty_report.discover('sheets', 'v4')
-        if row_count is not None:
-            JSON_TEMLATE['sheets'][0]['properties']['gridProperties'][
-                'rowCount'
-            ] = row_count
-        if column_count is not None:
-            JSON_TEMLATE['sheets'][0]['properties']['gridProperties'][
-                'columnCount'
-            ] = column_count
-        response = await kitty_report.as_service_account(
-            service.spreadsheets.create(json=JSON_TEMLATE)
         )
-        return response['spreadsheetId']
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-    except AiogoogleError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
+    service = await kitty_report.discover('sheets', 'v4')
+    updated_template = copy.deepcopy(JSON_TEMLATE)
+    (
+        updated_template['sheets'][0]
+        ['properties']['gridProperties']['rowCount']
+    ) = all_rows_count
+    (
+        updated_template['sheets'][0]
+        ['properties']['gridProperties']['columnCount']
+    ) = column_count
+    return await kitty_report.as_service_account(
+        service.spreadsheets.create(json=JSON_TEMLATE)
+    )
 
 
 async def set_user_permissions(
@@ -77,7 +66,7 @@ async def spreadsheets_update_value(
         column_count: Optional[int]
 ) -> None:
     service = await kitty_report.discover('sheets', 'v4')
-    header_with_date = [row[:] for row in TABLE_HEADER]
+    header_with_date = copy.deepcopy(TABLE_HEADER)
     header_with_date[0][1] = datetime.now().strftime(FORMAT)
     table_values = [
         *header_with_date,
@@ -97,7 +86,7 @@ async def spreadsheets_update_value(
     await kitty_report.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=f'R1C1:R{row_count}C{column_count}',
+            range=f'R1C1:R{row_count + BASE_ROW_COUNT}C{column_count}',
             valueInputOption='USER_ENTERED',
             json={
                 'majorDimension': 'ROWS',
