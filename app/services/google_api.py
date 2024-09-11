@@ -5,8 +5,9 @@ from typing import Optional
 from aiogoogle import Aiogoogle
 
 from app.constaints import (
-    FORMAT, JSON_TEMLATE, MAX_GOOGLE_SHEET_CELL_COUNT,
-    TABLE_HEADER, TOO_MUCH_CELL_ERROR, BASE_ROW_COUNT
+    BASE_ROW_COUNT, FORMAT, JSON_TEMLATE,
+    MAX_GOOGLE_SHEET_CELL_COUNT, TABLE_HEADER,
+    TOO_MUCH_CELL_ERROR
 )
 from app.core.config import settings
 from app.utils import format_duration

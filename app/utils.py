@@ -1,5 +1,6 @@
 from datetime import timedelta
-from app.constaints import BASE_ROW_COUNT, BASE_COLUMN_COUNT
+
+from app.constaints import BASE_COLUMN_COUNT, BASE_ROW_COUNT
 
 
 def format_duration(delta: timedelta) -> str:

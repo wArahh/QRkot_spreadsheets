@@ -1,9 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.constaints import NAME_ALREADY_IN_USE, \
-    CANNOT_UPDATE_FULLY_INVESTED_PROJECT, CANT_SET_LESS_THAN_ALREADY_DONATED, \
-    CANNOT_DELETE_INVESTED_PROJECT
+from app.constaints import (
+    CANNOT_DELETE_INVESTED_PROJECT, CANNOT_UPDATE_FULLY_INVESTED_PROJECT,
+    CANT_SET_LESS_THAN_ALREADY_DONATED, NAME_ALREADY_IN_USE
+)
 from app.crud import charity_project_crud
 from app.schemas.charity_project import CharityProjectUpdate
 
