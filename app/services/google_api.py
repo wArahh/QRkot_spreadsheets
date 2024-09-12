@@ -24,7 +24,8 @@ def get_full_table(
         ]
         for charity_project in charity_projects
     )
-    full_table = copy.deepcopy(TABLE_HEADER) + formatted_rows
+    full_table = copy.deepcopy(TABLE_HEADER)
+    full_table.extend(formatted_rows)
     full_table[0][1] = datetime.now().strftime(FORMAT)
     return full_table
 
