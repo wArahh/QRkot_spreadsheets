@@ -8,21 +8,22 @@ def donation_processing(
         sources: list[Funding]
 ) -> list[Funding]:
     update = []
-    for source in [
-        source for source in sources
-        if source.full_amount > source.invested_amount
-    ]:
-        target.full_amount = target.full_amount or 0
-        target.invested_amount = target.invested_amount or 0
+    datetime_now = datetime.utcnow()
+    target.full_amount = target.full_amount or 0
+    target.invested_amount = target.invested_amount or 0
+    remaining_target_amount = target.full_amount - target.invested_amount
+    for source in sources:
         source.full_amount = source.full_amount or 0
         source.invested_amount = source.invested_amount or 0
+        if remaining_target_amount <= 0:
+            break
         transfer_amount = min(
-            target.full_amount - target.invested_amount,
+            remaining_target_amount,
             source.full_amount - source.invested_amount
         )
         target.invested_amount += transfer_amount
         source.invested_amount += transfer_amount
-        datetime_now = datetime.utcnow()
+        remaining_target_amount -= transfer_amount
         if source.invested_amount == source.full_amount:
             source.fully_invested = True
             source.close_date = datetime_now

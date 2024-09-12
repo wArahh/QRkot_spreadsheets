@@ -1,16 +1,16 @@
-"""Final Migration
+"""Create initial tables
 
-Revision ID: 8122fc105985
+Revision ID: 7827b091c7f9
 Revises: 
-Create Date: 2024-08-14 20:16:56.730151
+Create Date: 2024-09-12 14:03:54.632689
 
 """
+from alembic import op
 import sqlalchemy as sa
 
-from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = '8122fc105985'
+revision = '7827b091c7f9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,7 +45,7 @@ def upgrade():
     op.create_table('donation',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('full_amount', sa.Integer(), nullable=True),
-    sa.Column('invested_amount', sa.Integer(), nullable=True),
+    sa.Column('invested_amount', sa.Integer(), nullable=False),
     sa.Column('fully_invested', sa.Boolean(), nullable=True),
     sa.Column('create_date', sa.DateTime(), nullable=True),
     sa.Column('close_date', sa.DateTime(), nullable=True),

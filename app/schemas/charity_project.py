@@ -26,7 +26,7 @@ class CharityProjectUpdate(CharityProjectBase):
 
 class CharityProjectDB(CharityProjectBase):
     id: int
-    invested_amount: int = 0
+    invested_amount: int
     fully_invested: bool = Field(False)
     create_date: datetime = Field(default_factory=datetime.utcnow)
     close_date: Optional[datetime] = None

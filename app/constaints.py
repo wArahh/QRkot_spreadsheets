@@ -22,8 +22,6 @@ BEARER_TOKEN_URL = 'auth/jwt/login'
 JWT_LIFETIME = 3600
 AUTHENTICATION_BACKEND_NAME = 'jwt'
 FORMAT = '%Y/%m/%d %H:%M:%S'
-BASE_ROW_COUNT = 3
-BASE_COLUMN_COUNT = 3
 MAX_GOOGLE_SHEET_CELL_COUNT = 10000000
 TOO_MUCH_CELL_ERROR = (
     'Превышено количество созднных ячек {all_rows_count} > {available cells}'
@@ -41,8 +39,8 @@ JSON_TEMLATE = (
                     sheetId=0,
                     title='KittyReport',
                     gridProperties=dict(
-                        rowCount=BASE_ROW_COUNT,
-                        columnCount=BASE_COLUMN_COUNT,
+                        rowCount=None,
+                        columnCount=None,
                     )
                 )
             )
@@ -50,7 +48,8 @@ JSON_TEMLATE = (
     )
 )
 TABLE_HEADER = [
-    ['Отчёт от', '{date}'],
+    ['Отчёт от', 'date'],
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание']
 ]
+SPREADSHEET_CREATE_ERROR = 'Error creating spreadsheet: {error}'
