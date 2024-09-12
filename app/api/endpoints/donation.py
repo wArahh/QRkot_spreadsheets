@@ -3,8 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
-from app.crud import donation_crud
-from app.models import CharityProject
+from app.crud import charity_project_crud, donation_crud
 from app.models.user import User
 from app.schemas.donation import CertainDonationDB, CreateDonation, DonationDB
 from app.services import donation_processing
@@ -50,8 +49,8 @@ async def create_donation(
     session.add_all(
         donation_processing(
             target,
-            await donation_crud.get_available_investments(
-                CharityProject, session
+            await charity_project_crud.get_available_investments(
+                session
             )
         )
     )

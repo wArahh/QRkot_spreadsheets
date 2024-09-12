@@ -4,7 +4,6 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.base import Funding
 from app.models.user import User
 
 
@@ -36,7 +35,7 @@ class CrudBase:
 
     async def create(
             self,
-            obj: Funding,
+            obj,
             session: AsyncSession,
             user: Optional[User] = None,
             commit: bool = True
@@ -44,6 +43,8 @@ class CrudBase:
         obj_data = obj.dict()
         if user is not None:
             obj_data['user_id'] = user.id
+        if not commit:
+            obj_data['invested_amount'] = 0
         new_obj = self.model(**obj_data)
         session.add(new_obj)
         if commit:
@@ -76,19 +77,18 @@ class CrudBase:
         await session.commit()
         return db_obj
 
-    @staticmethod
     async def get_available_investments(
-            db_model,
+            self,
             session: AsyncSession,
     ):
         return (
             await session.execute(
                 select(
-                    db_model
+                    self.model
                 ).where(
-                    db_model.fully_invested == 0
+                    self.model.fully_invested == 0
                 ).order_by(
-                    db_model.create_date
+                    self.model.create_date
                 )
             )
         ).scalars().all()
