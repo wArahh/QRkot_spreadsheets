@@ -24,10 +24,9 @@ def get_full_table(
         ]
         for charity_project in charity_projects
     )
-    full_table = TABLE_HEADER + formatted_rows
-    table = copy.deepcopy(full_table)
-    table[0][1] = datetime.now().strftime(FORMAT)
-    return table
+    full_table = copy.deepcopy(TABLE_HEADER) + formatted_rows
+    full_table[0][1] = datetime.now().strftime(FORMAT)
+    return full_table
 
 
 def get_table_size(table):
@@ -39,10 +38,11 @@ async def spreadsheets_create(
         google_table
 ) -> tuple:
     rows, columns = get_table_size(google_table)
-    if (rows * columns) > MAX_GOOGLE_SHEET_CELL_COUNT:
+    cell_count = rows * columns
+    if cell_count > MAX_GOOGLE_SHEET_CELL_COUNT:
         raise ValueError(
             TOO_MUCH_CELL_ERROR.format(
-                all_rows_count=rows,
+                all_rows_count=cell_count,
             )
         )
     service = await kitty_report.discover('sheets', 'v4')

@@ -10,6 +10,7 @@ def donation_processing(
     update = []
     datetime_now = datetime.utcnow()
     for source in sources:
+        update.append(source)
         transfer_amount = min(
             target.full_amount - target.invested_amount,
             source.full_amount - source.invested_amount
@@ -19,6 +20,4 @@ def donation_processing(
             if obj.invested_amount >= obj.full_amount:
                 obj.fully_invested = True
                 obj.close_date = datetime_now
-        if obj is source:
-            update.append(obj)
     return update

@@ -1,6 +1,7 @@
 from aiogoogle import Aiogoogle
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from app.core.db import get_async_session
 from app.core.google_client import get_service
@@ -24,17 +25,19 @@ async def create_google_sheets_statistics(
         kitty_report: Aiogoogle = Depends(get_service)
 ):
     """ superuser access only """
-    charity_projects = (
+    google_table = get_full_table(
         await charity_project_crud.get_projects_by_completion_rate(session)
     )
-    google_table = get_full_table(charity_projects)
     try:
         spreadsheet_id, spreadsheet_url = await spreadsheets_create(
             kitty_report,
             google_table
         )
     except ValueError as e:
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=e
+        )
     await set_user_permissions(
         spreadsheet_id,
         kitty_report

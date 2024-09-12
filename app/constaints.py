@@ -24,7 +24,7 @@ AUTHENTICATION_BACKEND_NAME = 'jwt'
 FORMAT = '%Y/%m/%d %H:%M:%S'
 MAX_GOOGLE_SHEET_CELL_COUNT = 10_000_000
 TOO_MUCH_CELL_ERROR = (
-    'Превышено количество созднных ячек {all_rows_count} > ',
+    'Превышено количество созднных ячек {created_cells_count} > ',
     MAX_GOOGLE_SHEET_CELL_COUNT
 )
 JSON_TEMLATE = (
