@@ -4,18 +4,42 @@ from datetime import datetime
 from aiogoogle import Aiogoogle
 
 from app.constaints import (
-    FORMAT, JSON_TEMLATE, MAX_GOOGLE_SHEET_CELL_COUNT, TOO_MUCH_CELL_ERROR
+    FORMAT, JSON_TEMLATE, MAX_GOOGLE_SHEET_CELL_COUNT, TOO_MUCH_CELL_ERROR,
+    TABLE_HEADER
 )
 from app.core.config import settings
-from app.utils import get_table_size
+from app.utils import format_duration
+
+
+def get_full_table(
+    charity_projects
+):
+    formatted_rows = list(
+        [
+            charity_project.name,
+            format_duration(
+                charity_project.close_date - charity_project.create_date
+            ),
+            charity_project.description
+        ]
+        for charity_project in charity_projects
+    )
+    full_table = TABLE_HEADER + formatted_rows
+    table = copy.deepcopy(full_table)
+    table[0][1] = datetime.now().strftime(FORMAT)
+    return table
+
+
+def get_table_size(table):
+    return len(table), max(map(len, table))
 
 
 async def spreadsheets_create(
         kitty_report: Aiogoogle,
-        charity_projects
+        google_table
 ) -> tuple:
-    rows, columns = get_table_size(charity_projects)
-    if (rows * columns) > (MAX_GOOGLE_SHEET_CELL_COUNT // columns):
+    rows, columns = get_table_size(google_table)
+    if (rows * columns) > MAX_GOOGLE_SHEET_CELL_COUNT:
         raise ValueError(
             TOO_MUCH_CELL_ERROR.format(
                 all_rows_count=rows,

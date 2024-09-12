@@ -1,4 +1,4 @@
-from aiogoogle import Aiogoogle, AiogoogleError
+from aiogoogle import Aiogoogle
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +9,7 @@ from app.crud.charity_project import charity_project_crud
 from app.services.google_api import (
     set_user_permissions, spreadsheets_create, spreadsheets_update_value
 )
-from app.utils import get_full_table
+from app.services.google_api import get_full_table
 
 router = APIRouter()
 
@@ -27,12 +27,13 @@ async def create_google_sheets_statistics(
     charity_projects = (
         await charity_project_crud.get_projects_by_completion_rate(session)
     )
+    google_table = get_full_table(charity_projects)
     try:
         spreadsheet_id, spreadsheet_url = await spreadsheets_create(
             kitty_report,
-            charity_projects
+            google_table
         )
-    except AiogoogleError as e:
+    except ValueError as e:
         raise e
     await set_user_permissions(
         spreadsheet_id,
@@ -40,7 +41,7 @@ async def create_google_sheets_statistics(
     )
     await spreadsheets_update_value(
         spreadsheet_id,
-        get_full_table(charity_projects),
+        google_table,
         kitty_report,
     )
     return spreadsheet_url
